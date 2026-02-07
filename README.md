@@ -12,9 +12,8 @@ Ultra-fast base64 operations powered by optimized C++ with JSI bindings. Built f
 
 ## 🚀 Why Choose This Library?
 
-- **🏎️ Blazing Fast** - Up to **10x faster** than pure JavaScript implementations
+- **🏎️ Blazing Fast** - Up to **5x faster** than other native base64 libraries
 - **⚡ Zero Bridge Overhead** - Direct JSI bindings eliminate React Native bridge bottleneck
-- **🎯 Optimized C++** - Hand-tuned algorithms with SIMD-friendly code and cache-aligned lookup tables
 - **🌐 URL-Safe Support** - Native support for URL-safe base64 encoding/decoding
 - **📦 Small Bundle** - Minimal JavaScript footprint, heavy lifting done in native code
 - **🔒 Type Safe** - Full TypeScript support with comprehensive type definitions
@@ -24,14 +23,12 @@ Ultra-fast base64 operations powered by optimized C++ with JSI bindings. Built f
 
 ## 📊 Performance
 
-Benchmark results on iPhone 14 Pro (encoding 1MB of data):
+Benchmark results on iPhone 16 Pro
 
 | Library | Time | Speed |
 |---------|------|-------|
-| **react-native-turbo-base64** | **8ms** | **🚀 Baseline** |
-| react-native-quick-base64 | 42ms | 5.2x slower |
-| base64-js | 89ms | 11.1x slower |
-| buffer (Node polyfill) | 156ms | 19.5x slower |
+| **react-native-turbo-base64** | **0.83ms** | **🚀 Baseline** |
+| react-native-quick-base64 | 4.62ms | 6x slower |
 
 > 💡 **Performance scales with data size** - the larger your data, the more dramatic the improvement!
 
@@ -289,17 +286,17 @@ async function encryptAndEncode(plaintext: string) {
 
 ---
 
-## 🆚 Comparison with Alternatives
+## 🆚 Comparison with react-native-quick-base64
 
-| Feature | react-native-turbo-base64 | react-native-quick-base64 | base64-js | buffer |
-|---------|--------------------------|---------------------------|-----------|---------|
-| **Speed** | ⚡⚡⚡⚡⚡ Fastest | ⚡⚡⚡ Fast | ⚡⚡ Slow | ⚡ Very Slow |
-| **JSI Bindings** | ✅ | ✅ | ❌ | ❌ |
-| **URL-safe Support** | ✅ | ✅ | ❌ | ✅ |
-| **TypeScript** | ✅ | ✅ | ✅ | ✅ |
-| **Bundle Size** | 🟢 Small | 🟢 Small | 🟡 Medium | 🔴 Large |
-| **Native Code** | C++ (optimized) | C++ | Pure JS | Pure JS |
-| **Maintenance** | 🟢 Active | 🟡 Occasional | 🟢 Active | 🟡 Stable |
+| Feature | react-native-turbo-base64 | react-native-quick-base64 |
+|---------|--------------------------|---------------------------|
+| **Speed** | ⚡⚡⚡⚡⚡ Fastest | ⚡⚡⚡ Fast |
+| **JSI Bindings** | ✅ | ✅ |
+| **URL-safe Support** | ✅ | ✅ |
+| **TypeScript** | ✅ | ✅ |
+| **Bundle Size** | 🟢 Small | 🟢 Small |
+| **Native Code** | C++ (highly optimized) | C++ |
+| **Maintenance** | 🟢 Active | 🟡 Occasional |
 
 ---
 
@@ -308,11 +305,10 @@ async function encryptAndEncode(plaintext: string) {
 This library uses several optimization techniques:
 
 1. **JSI Direct Bindings** - Functions are installed directly on the JavaScript global object, eliminating bridge serialization overhead
-2. **SIMD-Friendly Code** - Decoding loop processes 16 bytes at a time with optimal memory alignment
-3. **Cache-Aligned Tables** - Lookup tables are aligned to 64-byte boundaries for L1 cache efficiency
-4. **Branch Prediction Hints** - Uses `[[likely]]`/`[[unlikely]]` attributes for optimal branch prediction
-5. **Zero-Copy Operations** - Direct memory access to ArrayBuffers without copying when possible
-6. **Optimized Hot Paths** - Fast path for common cases (99.9%), slow path only for edge cases
+2. **Cache-Aligned Tables** - Lookup tables are aligned to 64-byte boundaries for L1 cache efficiency
+3. **Branch Prediction Hints** - Uses `[[likely]]`/`[[unlikely]]` attributes for optimal branch prediction
+4. **Zero-Copy Operations** - Direct memory access to ArrayBuffers without copying when possible
+5. **Optimized Hot Paths** - Fast path for common cases (99.9%), slow path only for edge cases
 
 ---
 
