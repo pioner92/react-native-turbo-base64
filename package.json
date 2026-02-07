@@ -1,6 +1,6 @@
 {
   "name": "react-native-turbo-base64",
-  "version": "0.1.0",
+  "version": "0.1.1",
   "description": "⚡ The fastest base64 encoding/decoding library for React Native. Up to 5x faster with highly optimized C++ and JSI bindings.",
   "main": "./lib/commonjs/index.js",
   "module": "./lib/module/index.js",
