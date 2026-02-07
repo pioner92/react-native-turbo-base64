@@ -17,28 +17,6 @@
 
 using namespace facebook;
 
-
-bool valueToString(facebook::jsi::Runtime& runtime,
-                   const facebook::jsi::Value& value,
-                   std::string* str) {
-  if (value.isString()) {
-    *str = value.asString(runtime).utf8(runtime);
-    return true;
-  }
-
-  if (value.isObject()) {
-    auto obj = value.asObject(runtime);
-    if (!obj.isArrayBuffer(runtime)) {
-      return false;
-    }
-    auto buf = obj.getArrayBuffer(runtime);
-    *str = std::string((char*)buf.data(runtime), buf.size(runtime));
-    return true;
-  }
-
-  return false;
-}
-
 void rntb_base64::install(jsi::Runtime* runtime) {
   jsi::Runtime& rt = *runtime;
   auto decodeNameId = jsi::PropNameID::forAscii(rt, "decodeBase64ToArrayBuffer");
@@ -48,7 +26,7 @@ void rntb_base64::install(jsi::Runtime* runtime) {
       rt, decodeNameId, 2,
       [](jsi::Runtime& runtime, const jsi::Value&, const jsi::Value* arguments,
          size_t count) -> jsi::Value {
-        if (count > 0 && !arguments[0].isString()) [[unlikely]] {
+        if (count < 1 || (count > 0 && !arguments[0].isString())) [[unlikely]] {
           throw jsi::JSError(
               runtime, "base64ToArrayBuffer: first argument must be a string");
         }
@@ -80,12 +58,15 @@ void rntb_base64::install(jsi::Runtime* runtime) {
 
           // Fast path check: detect padding in middle (rare case)
           bool has_middle_padding = false;
-          if (input_size > 4) [[unlikely]] {
+          if (input_size > 4) {
             // Check if '=' appears before the last 4 chars
             const char* padding_ptr = static_cast<const char*>(
                 std::memchr(input_data, '=', input_size - 4));
             has_middle_padding = (padding_ptr != nullptr);
           }
+
+          jsi::Function arrayBufferCtor =
+              runtime.global().getPropertyAsFunction(runtime, "ArrayBuffer");
 
           // Fast path: normal single-block decoding (99.9% of cases)
           if (!has_middle_padding) [[likely]] {
@@ -96,8 +77,6 @@ void rntb_base64::install(jsi::Runtime* runtime) {
                                  "Input is not valid base64-encoded data");
             }
 
-            jsi::Function arrayBufferCtor =
-                runtime.global().getPropertyAsFunction(runtime, "ArrayBuffer");
             jsi::Object o = arrayBufferCtor
                                 .callAsConstructor(
                                     runtime, static_cast<int>(output_length))
@@ -128,9 +107,10 @@ void rntb_base64::install(jsi::Runtime* runtime) {
             size_t segment_end = pos + 4;
             if (has_padding) {
               // This block has padding, decode it
-              const size_t block_output_len =
-                  base64_decoded_length(input_data + pos, 4);
-              if (block_output_len > 0) {
+              // Inline length calculation for 4-byte blocks (faster than function call)
+              const size_t block_output_len = 3 -
+                  (input_data[pos + 3] == '=') - (input_data[pos + 2] == '=');
+              if (block_output_len > 0) [[likely]] {
                 const size_t old_size = result.size();
                 result.resize(old_size + block_output_len);
 
@@ -168,8 +148,6 @@ void rntb_base64::install(jsi::Runtime* runtime) {
             }
           }
 
-          jsi::Function arrayBufferCtor =
-              runtime.global().getPropertyAsFunction(runtime, "ArrayBuffer");
           jsi::Object o =
               arrayBufferCtor
                   .callAsConstructor(runtime, static_cast<int>(result.size()))
@@ -197,21 +175,19 @@ void rntb_base64::install(jsi::Runtime* runtime) {
         }
 
         try {
-          std::string str;
-          if (!valueToString(runtime, arguments[0], &str)) {
-            throw jsi::JSError(runtime,
-                               "base64FromArrayBuffer: first argument must be "
-                               "a string or ArrayBuffer");
+          if (!arguments[0].isObject() ||
+              !arguments[0].asObject(runtime).isArrayBuffer(runtime)) [[unlikely]] {
+            throw jsi::JSError(runtime, "encodeBase64FromArrayBuffer: first argument must be an ArrayBuffer");
           }
-
+          
           bool url = false;
           if (count > 1 && arguments[1].isBool()) {
             url = arguments[1].asBool();
           }
 
-          const uint8_t* input_data =
-              reinterpret_cast<const uint8_t*>(str.data());
-          const size_t input_size = str.size();
+          jsi::ArrayBuffer input_array_buffer = arguments[0].asObject(runtime).getArrayBuffer(runtime);
+          const uint8_t* input_data = input_array_buffer.data(runtime);
+          const size_t input_size = input_array_buffer.size(runtime);
 
           // Calculate output size
           const size_t output_size = base64_encoded_length(input_size, url);
@@ -233,7 +209,7 @@ void rntb_base64::install(jsi::Runtime* runtime) {
           // padding)
           result.resize(actual_size);
 
-          return jsi::Value(jsi::String::createFromUtf8(runtime, result));
+          return jsi::String::createFromUtf8(runtime, result);
         } catch (const jsi::JSError&) {
           throw;
         } catch (const std::runtime_error& error) {

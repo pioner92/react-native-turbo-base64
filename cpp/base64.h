@@ -74,9 +74,9 @@ inline size_t base64_decoded_length(const char* data, size_t n) noexcept {
 }
 
 inline bool base64_decode_fast(
-  const char* data,
+  const char* __restrict data,
   const size_t input_length,
-  uint8_t* out,
+  uint8_t* __restrict out,
   const size_t output_length
 ) noexcept {
   if (!data || !out) return false;
@@ -95,6 +95,11 @@ inline bool base64_decode_fast(
   const uint8_t* const last = end - 4;
 
   while (p + 16 <= last) {
+    // Prefetch next block for better cache locality
+    #ifdef __GNUC__
+    __builtin_prefetch(p + 32, 0, 0);
+    #endif
+
     // Block 1
     const uint8_t a0 = decoding_table[p[0]];
     const uint8_t b0 = decoding_table[p[1]];
@@ -223,20 +228,21 @@ inline size_t base64_encoded_length(size_t input_length, bool url) noexcept {
 }
 
 inline size_t base64_encode_fast(
-  const uint8_t* data,
+  const uint8_t* __restrict data,
   const size_t input_length,
-  char* out,
+  char* __restrict out,
   const size_t output_capacity,
   bool url = false
 ) noexcept {
-  if (!data || !out) return 0;
+  if (!data || !out) [[unlikely]] return 0;
 
   const size_t expected_length = base64_encoded_length(input_length, url);
-  if (output_capacity < expected_length) return 0;
+  if (output_capacity < expected_length) [[unlikely]] return 0;
 
-  if (input_length == 0) return 0;
+  if (input_length == 0) [[unlikely]] return 0;
 
   const char* encoding_table = url ? encoding_table_url : encoding_table_standard;
+  static constexpr char padding_chars[2] = {'=', '\0'};
   const uint8_t* p = data;
   char* dst = out;
 
@@ -292,22 +298,22 @@ inline size_t base64_encode_fast(
   // ---- Handle remaining bytes (0-2 bytes) ----
   const size_t remaining = end - p;
 
-  if (remaining == 2) {
+  if (remaining == 2) [[unlikely]] {
     // 2 bytes remaining: encode to 3 chars + 1 padding (or no padding for URL)
     const uint32_t val = (uint32_t(p[0]) << 16) | (uint32_t(p[1]) << 8);
     dst[0] = encoding_table[(val >> 18) & 0x3F];
     dst[1] = encoding_table[(val >> 12) & 0x3F];
     dst[2] = encoding_table[(val >> 6) & 0x3F];
-    dst[3] = url ? 0 : '=';  // URL-safe may skip padding
-    dst += url ? 3 : 4;
-  } else if (remaining == 1) {
+    dst[3] = padding_chars[url];
+    dst += 3 + !url;
+  } else if (remaining == 1) [[unlikely]] {
     // 1 byte remaining: encode to 2 chars + 2 padding (or no padding for URL)
     const uint32_t val = uint32_t(p[0]) << 16;
     dst[0] = encoding_table[(val >> 18) & 0x3F];
     dst[1] = encoding_table[(val >> 12) & 0x3F];
-    dst[2] = url ? 0 : '=';
-    dst[3] = url ? 0 : '=';
-    dst += url ? 2 : 4;
+    dst[2] = padding_chars[url];
+    dst[3] = padding_chars[url];
+    dst += 2 + (!url << 1);
   }
 
   // Return actual length written

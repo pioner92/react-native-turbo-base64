@@ -24,6 +24,11 @@ const Benchmarks = () => {
     setProcessingNativeBase64(true)
     let dataToProcess = data
     await sleep(1)
+
+    //warm up
+    const decoded = toByteArray(dataToProcess)
+    fromByteArray(decoded)
+
     const startTime = performance.now()
 
     for (let iter = 0; iter < 30; iter++) {
@@ -43,6 +48,9 @@ const Benchmarks = () => {
     setProcessingTurbo64(true)
     let dataToProcess = data
     await sleep(1)
+    // warm up
+    const decoded = toByteArrayTurbo(dataToProcess)
+    fromByteArrayTurbo(decoded)
     const startTime = performance.now()
 
     for (let iter = 0; iter < 30; iter++) {
