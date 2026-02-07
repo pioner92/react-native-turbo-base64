@@ -23,12 +23,12 @@ Ultra-fast base64 operations powered by optimized C++ with JSI bindings. Built f
 
 ## 📊 Performance
 
-Benchmark results on iPhone 16 Pro
+Benchmark results
 
-| Library | Time | Speed |
-|---------|------|-------|
-| **react-native-turbo-base64** | **0.83ms** | **🚀 Baseline** |
-| react-native-quick-base64 | 4.62ms | 6x slower |
+| iPhone                                            | Android                                             |
+| ------------------------------------------------- | --------------------------------------------------- |
+| ![iPhone](./assets/iphone.png) | ![Android](./assets/android.png) |
+
 
 > 💡 **Performance scales with data size** - the larger your data, the more dramatic the improvement!
 
@@ -166,18 +166,6 @@ const trimmed = trimBase64Padding(padded);
 console.log(trimmed); // "SGVsbG8"
 ```
 
----
-
-### `getNative()`
-
-Returns the native JSI functions for advanced use cases.
-
-**Returns:** Object with native functions
-- `encodeBase64FromArrayBuffer: (input: ArrayBuffer, urlSafe: boolean) => string`
-- `decodeBase64ToArrayBuffer: (input: string, removeLinebreaks: boolean) => Uint8Array`
-
----
-
 ## 🎨 Advanced Examples
 
 ### Working with Images
@@ -275,14 +263,14 @@ async function encryptAndEncode(plaintext: string) {
 
 ## 🔥 Features
 
-✅ **Standard & URL-safe base64** - Full RFC 4648 compliance
-✅ **Linebreak handling** - Automatically remove `\n` and `\r` during decode
-✅ **Padding tolerance** - Handles missing or misplaced padding gracefully
-✅ **TypeScript first** - Complete type definitions included
-✅ **Zero dependencies** - No runtime dependencies except React Native
-✅ **JSI direct bindings** - Bypass the bridge entirely
-✅ **Memory efficient** - Optimized memory usage for large data
-✅ **Works with Expo** - Compatible with Expo dev builds
+- ✅ **Standard & URL-safe base64** - Full RFC 4648 compliance
+- ✅ **Linebreak handling** - Automatically remove `\n` and `\r` during decode
+- ✅ **Padding tolerance** - Handles missing or misplaced padding gracefully
+- ✅ **TypeScript first** - Complete type definitions included
+- ✅ **Zero dependencies** - No runtime dependencies except React Native
+- ✅ **JSI direct bindings** - Bypass the bridge entirely
+- ✅ **Memory efficient** - Optimized memory usage for large data
+- ✅ **Works with Expo** - Compatible with Expo dev builds
 
 ---
 
@@ -296,7 +284,6 @@ async function encryptAndEncode(plaintext: string) {
 | **TypeScript** | ✅ | ✅ |
 | **Bundle Size** | 🟢 Small | 🟢 Small |
 | **Native Code** | C++ (highly optimized) | C++ |
-| **Maintenance** | 🟢 Active | 🟡 Occasional |
 
 ---
 
