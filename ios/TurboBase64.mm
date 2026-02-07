@@ -1,21 +1,41 @@
 #import "TurboBase64.h"
+#import <React/RCTBridge+Private.h>
+#import <ReactCommon/RCTTurboModule.h>
+#import <React/RCTBridge.h>
+#import <React/RCTUtils.h>
+#import <jsi/jsi.h>
+#import "react-native-turbo-base64.hpp"
 
-@implementation TurboBase64
-- (NSNumber *)multiply:(double)a b:(double)b {
-    NSNumber *result = @(a * b);
+using namespace facebook;
 
-    return result;
+@implementation RNTurboBase64
+RCT_EXPORT_MODULE(RNTurboBase64)
+
+@synthesize bridge = _bridge;
+@synthesize methodQueue = _methodQueue;
+
++ (BOOL)requiresMainQueueSetup {
+  return NO;
 }
 
-- (std::shared_ptr<facebook::react::TurboModule>)getTurboModule:
-    (const facebook::react::ObjCTurboModule::InitParams &)params
-{
-    return std::make_shared<facebook::react::NativeTurboBase64SpecJSI>(params);
+RCT_EXPORT_BLOCKING_SYNCHRONOUS_METHOD(install){
+	NSLog(@"Installing JSI bindings for react-native-turbo-base64 ...");
+	RCTBridge* bridge = [RCTBridge currentBridge];
+	RCTCxxBridge* cxxBridge = (RCTCxxBridge*)bridge;
+
+	if (cxxBridge == nil) {
+		return @false;
+	}
+
+	auto jsiRuntime = (jsi::Runtime*) cxxBridge.runtime;
+	if (jsiRuntime == nil) {
+		return @false;
+	}
+
+	rntb_base64::install(jsiRuntime);
+
+	return @true;
 }
 
-+ (NSString *)moduleName
-{
-  return @"TurboBase64";
-}
 
 @end

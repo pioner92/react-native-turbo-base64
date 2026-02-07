@@ -1,5 +1,6 @@
-#import <TurboBase64Spec/TurboBase64Spec.h>
+#pragma once
+#import <React/RCTBridgeModule.h>
 
-@interface TurboBase64 : NSObject <NativeTurboBase64Spec>
+@interface RNTurboBase64 : NSObject <RCTBridgeModule>
 
 @end

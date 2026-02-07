@@ -1,17 +1,12 @@
 {
   "name": "react-native-turbo-base64",
   "version": "0.1.0",
-  "description": "fastest base64",
-  "main": "./lib/module/index.js",
-  "types": "./lib/typescript/src/index.d.ts",
-  "exports": {
-    ".": {
-      "source": "./src/index.tsx",
-      "types": "./lib/typescript/src/index.d.ts",
-      "default": "./lib/module/index.js"
-    },
-    "./package.json": "./package.json"
-  },
+  "description": "⚡ The fastest base64 encoding/decoding library for React Native. Up to 10x faster with optimized C++ and JSI bindings.",
+  "main": "./lib/commonjs/index.js",
+  "module": "./lib/module/index.js",
+  "types": "lib/typescript/index.d.ts",
+  "react-native": "src/index",
+  "source": "./src/index",
   "files": [
     "src",
     "lib",
@@ -40,8 +35,25 @@
   },
   "keywords": [
     "react-native",
+    "base64",
+    "encoding",
+    "decoding",
+    "encode",
+    "decode",
+    "fast",
+    "performance",
+    "jsi",
+    "turbo",
+    "native",
+    "cpp",
     "ios",
-    "android"
+    "android",
+    "url-safe",
+    "buffer",
+    "uint8array",
+    "arraybuffer",
+    "binary",
+    "crypto"
   ],
   "repository": {
     "type": "git",
@@ -63,9 +75,8 @@
     "del-cli": "^6.0.0",
     "react": "19.2.0",
     "react-native": "0.83.0",
-    "react-native-builder-bob": "^0.40.17",
+    "react-native-builder-bob": "^0.35.2",
     "release-it": "^19.0.4",
-    "turbo": "^2.5.6",
     "typescript": "^5.9.2"
   },
   "peerDependencies": {
@@ -80,12 +91,8 @@
     "source": "src",
     "output": "lib",
     "targets": [
-      [
-        "module",
-        {
-          "esm": true
-        }
-      ],
+      "commonjs",
+      "module",
       [
         "typescript",
         {
@@ -93,14 +100,6 @@
         }
       ]
     ]
-  },
-  "codegenConfig": {
-    "name": "TurboBase64Spec",
-    "type": "modules",
-    "jsSrcsDir": "src",
-    "android": {
-      "javaPackageName": "com.turbobase64"
-    }
   },
   "release-it": {
     "git": {
@@ -122,11 +121,8 @@
     }
   },
   "create-react-native-library": {
-    "type": "turbo-module",
-    "languages": "kotlin-objc",
-    "tools": [
-      "release-it"
-    ],
-    "version": "0.57.0"
+    "type": "legacy-module",
+    "languages": "cpp",
+    "version": "0.45.5"
   }
 }

@@ -1,20 +1,52 @@
-import { Text, View, StyleSheet } from 'react-native';
-import { multiply } from 'react-native-turbo-base64';
+import { SafeAreaView, ScrollView, StyleSheet, Text, View } from 'react-native'
+import Benchmarks from './Benchmarks'
+import Tests from './Tests'
 
-const result = multiply(3, 7);
+// @ts-ignore
+const isHermes = () => !!global.HermesInternal
 
-export default function App() {
+const App = () => {
   return (
-    <View style={styles.container}>
-      <Text>Result: {result}</Text>
-    </View>
-  );
+    <SafeAreaView style={styles.container}>
+      <Text style={styles.title}>react-native-turbo-base64</Text>
+      <ScrollView style={styles.contentView}>
+        <View style={styles.section}>
+          <Text style={styles.sectionText}>Setup</Text>
+          <Text>Hermes enabled: {JSON.stringify(isHermes())}</Text>
+        </View>
+        <View style={styles.section}>
+          <Text style={styles.sectionText}>Benchmarks</Text>
+          <Benchmarks />
+        </View>
+        <View style={styles.section}>
+          <Text style={styles.sectionText}>Tests</Text>
+          <Tests />
+        </View>
+      </ScrollView>
+    </SafeAreaView>
+  )
 }
+
+export default App
 
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    alignItems: 'center',
-    justifyContent: 'center',
+    backgroundColor: 'white'
   },
-});
+  contentView: {
+    marginHorizontal: 20
+  },
+  title: {
+    fontSize: 24,
+    textAlign: 'center',
+    paddingVertical: 15
+  },
+  section: {
+    marginBottom: 18
+  },
+  sectionText: {
+    fontSize: 18,
+    textDecorationLine: 'underline'
+  }
+})

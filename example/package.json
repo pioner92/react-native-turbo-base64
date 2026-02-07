@@ -10,8 +10,17 @@
     "build:ios": "react-native build-ios --mode Debug"
   },
   "dependencies": {
+    "base-64": "^1.0.0",
+    "base64-js": "^1.5.1",
+    "buffer": "^6.0.3",
+    "chai": "^5.1.0",
+    "events": "^3.3.0",
+    "mocha": "^10.3.0",
     "react": "19.2.0",
-    "react-native": "0.83.0"
+    "react-native": "0.83.0",
+    "react-native-quick-base64": "^2.2.2",
+    "stream-browserify": "^3.0.0",
+    "util": "^0.12.5"
   },
   "devDependencies": {
     "@babel/core": "^7.25.2",
