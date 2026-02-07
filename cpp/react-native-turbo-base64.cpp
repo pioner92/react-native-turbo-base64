@@ -12,7 +12,7 @@
 #include <cstdint>
 #include <cstring>
 
-#include "react-native-turbo-base64.hpp"
+#include "react-native-turbo-base64.h"
 #include "base64.h"
 
 using namespace facebook;

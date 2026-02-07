@@ -4,7 +4,7 @@
 #import <React/RCTBridge.h>
 #import <React/RCTUtils.h>
 #import <jsi/jsi.h>
-#import "react-native-turbo-base64.hpp"
+#import "react-native-turbo-base64.h"
 
 using namespace facebook;
 
