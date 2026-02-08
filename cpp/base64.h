@@ -62,7 +62,7 @@ alignas(64) static constexpr uint8_t decoding_table[256] = {
   0xFF,0xFF,0xFF,0xFF,0xFF,0xFF,0xFF,0xFF, 0xFF,0xFF,0xFF,0xFF,0xFF,0xFF,0xFF,0xFF
 };
 
-
+__attribute__((always_inline))
 inline size_t base64_decoded_length(const char* data, size_t n) noexcept {
     if (n < 4) return 0;
     if ((n & 3u) != 0) return 0;
@@ -95,9 +95,9 @@ inline bool base64_decode_fast(
   const uint8_t* const last = end - 4;
 
   while (p + 16 <= last) {
-    // Prefetch next block for better cache locality
+    // Prefetch next blocks for better cache locality
     #ifdef __GNUC__
-    __builtin_prefetch(p + 32, 0, 0);
+    __builtin_prefetch(p + 64, 0, 0);
     #endif
 
     // Block 1

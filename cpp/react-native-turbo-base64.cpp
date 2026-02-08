@@ -200,7 +200,7 @@ void rntb_base64::install(jsi::Runtime* runtime) {
           const size_t actual_size = base64_encode_fast(
               input_data, input_size, &result[0], output_size, url);
 
-          if (actual_size == 0 && input_size > 0) {
+          if (actual_size == 0 && input_size > 0)[[unlikely]] {
             throw jsi::JSError(runtime,
                                "base64FromArrayBuffer: encoding failed");
           }

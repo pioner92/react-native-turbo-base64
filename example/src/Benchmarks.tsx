@@ -1,33 +1,29 @@
 /* global performance */
 import { useState } from 'react'
 import { StyleSheet, View, Text, Pressable, Platform } from 'react-native'
-// import jsBase64 from 'base64-js'
-import {fromByteArray as fromByteArrayTurbo,toByteArray as toByteArrayTurbo } from 'react-native-turbo-base64'
+import { fromByteArray as fromByteArrayTurbo, toByteArray as toByteArrayTurbo } from 'react-native-turbo-base64'
 import { toByteArray, fromByteArray } from 'react-native-quick-base64'
-import { data } from './image.json'
+// 5.3 KB
+import { data as smallData } from './image.json'
+// 1.2 MB
+import { data as bigData } from './image-large.json'
 
 
-const sleep = (t: number) => new Promise(resolve => setTimeout(resolve, t))
 
 const round = (num: number, decimalPlaces = 0): string => {
   return num.toFixed(decimalPlaces)
 }
 
 const Benchmarks = () => {
-  const [processingTurbo64, setProcessingTurbo64] = useState<boolean>(false)
-  const [Turbo64Result, setTurbo64Result] = useState<number>(0)
-  const [processingNativeBase64, setProcessingNativeBase64] =
-    useState<boolean>(false)
-  const [nativeBase64Result, setNativeBase64Result] = useState<number>(0)
+  const [turbo64SmallResult, setTurbo64SmallResult] = useState<number>(0)
+  const [isProcessing, setIsProcessing] = useState<boolean>(false)
+  const [turbo64BigResult, setTurbo64BigResult] = useState<number>(0)
+  const [nativeBase64SmallResult, setNativeBase64SmallResult] = useState<number>(0)
+  const [nativeBase64BigResult, setNativeBase64BigResult] = useState<number>(0)
 
-  const handleNativeBase64Press = async () => {
-    setProcessingNativeBase64(true)
+  const handleNativeBase64 =  (data: string) => {
     let dataToProcess = data
-    await sleep(1)
-
-    //warm up
-    const decoded = toByteArray(dataToProcess)
-    fromByteArray(decoded)
+    // await sleep(1)
 
     const startTime = performance.now()
 
@@ -40,40 +36,66 @@ const Benchmarks = () => {
     }
     const finishedTime = performance.now()
     console.log('done! took', finishedTime - startTime, 'milliseconds')
-    setNativeBase64Result(finishedTime - startTime)
-    setProcessingNativeBase64(false)
+    return finishedTime - startTime
   }
 
-  const handleTurbo64Press = async () => {
-    setProcessingTurbo64(true)
+  const handleTurbo64Press = (data: string) => {
     let dataToProcess = data
-    await sleep(1)
-    // warm up
-    const decoded = toByteArrayTurbo(dataToProcess)
-    fromByteArrayTurbo(decoded)
+    // await sleep(1)
+
     const startTime = performance.now()
 
     for (let iter = 0; iter < 30; iter++) {
       const decoded = toByteArrayTurbo(dataToProcess)
       dataToProcess = fromByteArrayTurbo(decoded)
+      if (dataToProcess !== data) {
+        throw new Error('Data does not match')
+      }
     }
     const finishedTime = performance.now()
     console.log('done! took', finishedTime - startTime, 'milliseconds')
-    setTurbo64Result(finishedTime - startTime)
-    setProcessingTurbo64(false)
+    return finishedTime - startTime
   }
-  const speedup =
-    Turbo64Result && nativeBase64Result
-      ?   round(nativeBase64Result/Turbo64Result) + 'x faster'
+
+
+  const runBenchmarks = async () => {
+    setIsProcessing(true)
+    
+    setNativeBase64SmallResult(handleNativeBase64(smallData))
+    setTurbo64SmallResult(handleTurbo64Press(smallData))
+    setNativeBase64BigResult(handleNativeBase64(bigData))
+    setTurbo64BigResult(handleTurbo64Press(bigData))
+
+    setIsProcessing(false)
+  }
+
+
+  const speedupSmall =
+    turbo64SmallResult && nativeBase64SmallResult
+      ? round(nativeBase64SmallResult / turbo64SmallResult) + 'x faster'
+      : ' '
+
+  const speedupBig =
+    turbo64BigResult && nativeBase64BigResult
+      ? round(nativeBase64BigResult / turbo64BigResult) + 'x faster'
       : ' '
 
   return (
     <View>
+      <View style={{ flexDirection: 'row', alignSelf: 'flex-end', gap: 80 }}>
+        <Text style={styles.heading}>5.9KB</Text>
+        <Text style={styles.heading}>0.9MB</Text>
+      </View>
       <View style={styles.lib}>
         <Text style={styles.heading}>react-native-quick-base64</Text>
         <Text style={styles.result}>
-          {nativeBase64Result > 0
-            ? `${round(nativeBase64Result, 6)} milliseconds`
+          {nativeBase64SmallResult > 0
+            ? `${round(nativeBase64SmallResult, 2)} ms`
+            : ''}
+        </Text>
+        <Text style={styles.result}>
+          {nativeBase64BigResult > 0
+            ? `${round(nativeBase64BigResult, 2)} ms`
             : ''}
         </Text>
       </View>
@@ -81,21 +103,25 @@ const Benchmarks = () => {
       <View style={styles.lib}>
         <Text style={styles.heading}>react-native-turbo-base64</Text>
         <Text style={styles.result}>
-          {Turbo64Result > 0 ? `${round(Turbo64Result, 6)} milliseconds` : ''}
+          {turbo64SmallResult > 0 ? `${round(turbo64SmallResult, 2)} ms` : ''}
+        </Text>
+        <Text style={styles.result}>
+          {turbo64BigResult > 0 ? `${round(turbo64BigResult, 2)} ms` : ''}
         </Text>
       </View>
 
-      <Text style={styles.speedup}>{speedup}</Text>
-
+      <View style={{ flexDirection: 'row', alignSelf: 'flex-end', gap: 20 }}>
+        <Text style={styles.speedup}>{speedupSmall}</Text>
+        <Text style={styles.speedup}>{speedupBig}</Text>
+      </View>
       <Pressable
         onPress={() => {
-          handleNativeBase64Press()
-          handleTurbo64Press()
+          runBenchmarks()
         }}
         style={styles.button}
       >
         <Text style={styles.pressable}>
-          {processingNativeBase64 || processingTurbo64
+          {isProcessing
             ? 'Processing...'
             : 'Run Benchmarks'}
         </Text>
@@ -125,9 +151,11 @@ const styles = StyleSheet.create({
   },
   result: {
     fontFamily: Platform.OS === 'ios' ? 'Courier New' : 'monospace',
+    flex: 1,
+    textAlign: 'right',
     marginVertical: 5
   },
-  button: { backgroundColor: 'skyblue', padding: 12 },
+  button: { backgroundColor: 'skyblue', padding: 12, marginTop: 20 },
   speedup: {
     marginVertical: 5,
     fontSize: 18,
