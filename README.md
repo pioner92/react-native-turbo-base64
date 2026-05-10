@@ -1,5 +1,11 @@
 # ⚡ react-native-turbo-base64
 
+> **This repository has been moved!**
+> Development continues at [react-native-ultra-base64](https://github.com/pioner92/react-native-ultra-base64).
+> Please use the new package going forward. This repo is no longer maintained.
+
+---
+
 **The fastest base64 encoding/decoding library for React Native**
 
 Ultra-fast base64 operations powered by optimized C++ with JSI bindings. Built for performance-critical applications that need blazing-fast base64 encoding and decoding.
